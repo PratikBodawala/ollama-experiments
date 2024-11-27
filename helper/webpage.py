@@ -1,5 +1,8 @@
-from selenium import webdriver
 from bs4 import BeautifulSoup
+from selenium import webdriver
+
+from helper.utils import cache_tmp
+
 
 def fetch_text_recursive(element, depth=0, max_depth=2):
     if depth > max_depth:
@@ -11,6 +14,8 @@ def fetch_text_recursive(element, depth=0, max_depth=2):
     #     text += fetch_text_recursive(child, depth + 1, max_depth)
     return text
 
+
+@cache_tmp
 def fetch_html_content(url: str) -> str:
     driver = webdriver.Chrome()  # Ensure correct path to your WebDriver
     try:
