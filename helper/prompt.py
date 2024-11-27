@@ -7,5 +7,5 @@ def prompt(question: str, context: str) -> str:
     :return: The user's response to the question.
     """
     # print(f"Context: {context}")
-    return f'{question}\n\n{context}\n'
+    return f'{context}\n\n{question}'
 

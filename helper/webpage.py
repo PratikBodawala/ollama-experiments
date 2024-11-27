@@ -5,28 +5,23 @@ def fetch_text_recursive(element, depth=0, max_depth=2):
     if depth > max_depth:
         return ""
 
-    # Get text from the current element and its children
-    text = element.get_attribute('innerText')
-    for child in element.find_elements_by_xpath('./*'):
-        text += fetch_text_recursive(child, depth + 1, max_depth)
+    # Fetch text from the current element and its children
+    text = element.getText()
+    # for child in element.find_elements_by_xpath('./*'):
+    #     text += fetch_text_recursive(child, depth + 1, max_depth)
     return text
 
 def fetch_html_content(url: str) -> str:
-    # Set up the WebDriver (make sure the path to your driver is correct)
-    driver = webdriver.Chrome()  # Update this path
+    driver = webdriver.Chrome()  # Ensure correct path to your WebDriver
     try:
         driver.get(url)
 
-        # Fetch the entire page source
-        html_source = driver.page_source
+        # Parse HTML content using BeautifulSoup
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        root_element = soup.find('body')  # Adjust this if needed
 
-        # Parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(html_source, 'html.parser')
-
-        # Recursive function to fetch text up to a certain depth
-        root_element = soup.find('body')  # You can change this to any element you want as the starting point
-        content_text = fetch_text_recursive(root_element, max_depth=1)  # Set your desired depth
-
+        # Fetch text recursively up to a certain depth
+        content_text = fetch_text_recursive(root_element, max_depth=2)
         return content_text.strip()
     finally:
         driver.quit()
