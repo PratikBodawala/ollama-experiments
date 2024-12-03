@@ -4,12 +4,13 @@ from hashlib import sha3_512
 
 
 def cache_tmp(function):
-    def wrapper(url, *args, **kwargs):
-        filename = sha3_512(url.encode()).hexdigest()
+    def wrapper(*args, **kwargs):
+        filename = sha3_512(('|'.join(map(str, args)) + '#' + '|'.join(kwargs.keys()) + '#' + '|'.join(
+            kwargs.values())).encode()).hexdigest()
         tmp_dir = tempfile.gettempdir()
         tmp_file_path = os.path.join(tmp_dir, filename)
         if not os.path.isfile(tmp_file_path):
-            output = function(url, *args, **kwargs)
+            output = function(*args, **kwargs)
             with open(tmp_file_path, 'w') as f:
                 f.write(output)
             return output
