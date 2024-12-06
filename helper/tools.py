@@ -1,19 +1,20 @@
 from pprint import pprint
 
 import ollama
+from ollama._types import ListResponse
 
 from helper.utils import cache_tmp
 
 
-def get_all_models():
-    for model in ollama.list()['models']:
+def get_all_models() -> ListResponse:
+    for model in ollama.list().models:
         yield model
 
 
 @cache_tmp
-def get_models_capability(model_obj: dict):
+def get_models_capability(model_obj):
     return ollama.chat(
-        model_obj['name'],
+        model_obj.model,
         [{'content': "What can you do? describe in only keywords", 'role': 'user'}],
         options=ollama.Options(num_thread=15)
     )['message']['content']
@@ -24,7 +25,7 @@ def choose_best_model_from_prompt(prompt: str) -> str:
     '''
 
     for model in get_all_models():
-        ask_to_ollama += f"{model['name']} : {get_models_capability(model)}\n"
+        ask_to_ollama += f"{model.model} : {get_models_capability(model)}\n"
 
     ask_to_ollama += '''Please choose the best model for this prompt, and provide the model name as the response.
     '''
@@ -36,13 +37,12 @@ def choose_best_model_from_prompt(prompt: str) -> str:
         [{'content': ask_to_ollama, 'role': 'user'}],
         options=ollama.Options(num_thread=15)
     )
-    message = output.pop('message')['content']
 
     pprint(output)
 
-    for model in get_all_models():
-        if model['name'] in message:
-            return model['name']
+    for _ in get_all_models():
+        if _.model in output.message.content:
+            return _.model
 
 
 if __name__ == "__main__":
