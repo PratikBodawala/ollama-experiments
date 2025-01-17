@@ -49,5 +49,6 @@ def choose_best_model_from_prompt(prompt: str) -> str:
 
 
 if __name__ == "__main__":
-    for i,_ in enumerate(get_all_models(filter_out='embed')):
-        print(i,_.model)
+    for i, model in enumerate(get_all_models(filter_out='embed')):
+        print(i, model.model)
+

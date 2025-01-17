@@ -6,7 +6,8 @@ from helper.tools import get_all_models
 
 def update_all_models():
     for model in get_all_models():
-        print(ollama.pull(model.model, insecure=False, stream=True), flush=True)
+        for _ in ollama.pull(model.model, insecure=False, stream=True):
+            print(_, end='')
 
 
 if __name__ == '__main__':
