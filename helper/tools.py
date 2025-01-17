@@ -2,12 +2,15 @@ from pprint import pprint
 
 import ollama
 from ollama._types import ListResponse
+from typing_extensions import Sequence
 
 from helper.utils import cache_tmp
 
 
-def get_all_models() -> ListResponse:
+def get_all_models(filter_out=None) -> Sequence[ListResponse.Model]:
     for model in ollama.list().models:
+        if filter_out and filter_out in model.model:
+            continue
         yield model
 
 
@@ -24,7 +27,7 @@ def choose_best_model_from_prompt(prompt: str) -> str:
     ask_to_ollama = '''which model is best for this prompt? following are the models and their capabilities
     '''
 
-    for model in get_all_models():
+    for model in get_all_models(filter_out='embed'):
         ask_to_ollama += f"{model.model} : {get_models_capability(model)}\n"
 
     ask_to_ollama += '''Please choose the best model for this prompt, and provide the model name as the response.
@@ -33,17 +36,18 @@ def choose_best_model_from_prompt(prompt: str) -> str:
     ask_to_ollama += prompt
 
     output = ollama.chat(
-        'llama3.2',
-        [{'content': ask_to_ollama, 'role': 'user'}],
+        'phi4',
+        [ollama.Message(role='user', content=ask_to_ollama)],
         options=ollama.Options(num_thread=15)
     )
 
     pprint(output)
 
     for _ in get_all_models():
-        if _.model in output.message.content:
+        if _.model.lower() in output.message.content.lower():
             return _.model
 
 
 if __name__ == "__main__":
-    print(choose_best_model_from_prompt('Write a code to find the sum of all numbers in a list.'))
+    for i,_ in enumerate(get_all_models(filter_out='embed')):
+        print(i,_.model)
